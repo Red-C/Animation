@@ -8,11 +8,11 @@
 
 #ifndef HungerGame_v2_myConstant_h
 #define HungerGame_v2_myConstant_h
-
+#include <math.h>
 
 #define DEBUG_MODE
-
-
+#define calcDegree(a,b) atan( ((b).z - (a).z) / ((b).x/(a).x))  
+#define calcDistance(a,b) sqrt(pow(((b).z - (a).z),2) / pow(((b).x/(a).x),2))
 // TIMER
 #define HUNTER_WALK_STAMP 0
 #define DEFAULT_STAMP     1  
@@ -36,7 +36,10 @@
 
 #define scale(a, b, c) ((TIME - myTimer[a] - b ) / c)
 
+bool isMoving 			=0;
+bool isShoting 			=0;
 // SPEED
+//
 #define HUNTER_SPEED 5
 #define WOLF_SPEED  10
 #define CHICKEN_SPEED 0.5 
