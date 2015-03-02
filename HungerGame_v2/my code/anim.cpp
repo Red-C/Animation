@@ -14,16 +14,69 @@ double TIME = 0;
 
 const unsigned X = 0, Y = 1, Z = 2;
 
- vec4 eye(0 , 200, -15, 1), ref( 0 ,0, -10, 1), up( 0, 1, 0, 0 );	// The eye point and look-at point.
+ vec4 eye(0 , 5, -15, 1), ref( 0 ,5, 10, 1), up( 0, 1, 0, 0 );	// The eye point and look-at point.
 
 //vec4 eye( 0, 0, 20, 1), ref( 0 , 0, 0, 1 ), up( 0, 1, 0, 0 );	// The eye point and look-at point.
 mat4	orientation, model_view;
 ShapeData chickenData, cubeData, sphereData, coneData, cylData;				// Structs that hold the Vertex Array Object index and number of vertices of each shape.
-GLuint	texture_wolf, texture_tree, texture_chicken, texture_wolf_mouth, texture_skin, texture_earth;
+GLuint	texture_wolf, texture_tree, texture_chicken, texture_wolf_mouth, texture_skin, texture_sky, texture_head;
 GLint   uModelView, uProjection, uView,
 		uAmbient, uDiffuse, uSpecular, uLightPos, uShininess,
 		uTex, uEnableTex;
 
+
+/*        my variables      */
+vec4 Positions[5] = {
+    vec4(0,0,10,1),
+    vec4(-45,0,-45,1),
+    vec4(45,0,45,1),
+    vec4(0,0,-20,1),
+    vec4(0,0,10,1)
+    
+};
+vec4 tPositions[5] = {
+    vec4(0,0,10,1),
+    vec4(-45,0,-45,1),
+    vec4(45,0,45,1),
+    vec4(0,0,-20,1),
+    vec4(0,0,10,1)
+    
+};
+
+
+
+mat4 model[3];
+mat4 tmodel[3];
+double myTimer[5] = {-1};
+
+vec4 trees[20];
+
+mat4 parts[NPARTS];
+mat4 tparts[NPARTS];
+vec4 eye_vector;
+
+#define NTREE 28
+
+point2 treePos[NTREE] = {
+    point2(1,-40),point2(-10,1),point2(10,1),point2(1,-30),point2(1,10),point2(10,-17),point2(-10,14),
+    point2(-20, -28),point2(-22,-8),point2(28,-19),point2(22,8),point2(-18,25),point2(-17,-25),point2(-22,5),
+      point2(-32,5),point2(28,12),point2(28,4),point2(30,-37.33),point2(30,20.4),point2(-38,-27.4),point2(-30,28),
+      point2(14,-25),point2(-15,27),point2(15,37),point2(18,-33.33),point2(4,28.4),point2(5,-27.4),point2(7,28)
+
+};
+
+/*   end my variables   */
+/* my function */
+void    updateLance();
+void    updateHunter();
+void    updateWolf();
+void    updateChicken();
+void    drawBackGround();
+void    updateCamera();
+vec4 getPosition(mat4 model);
+double getDistance(vec4, vec4);
+double getDegree(vec4, vec4);
+/* end my function */
 void init()
 {
 #ifdef EMSCRIPTEN
@@ -32,7 +85,8 @@ void init()
      TgaImage treeImage("skin.tga");
      TgaImage wolfmouthImage("wolf_mouth.tga");
     TgaImage treeImage("tree.tga");
-    TgaImage chickenImage("wolf.tga");
+        TgaImage chickenImage("chicken.tga");
+    TgaImage headImage("hunter_h.tga");
 
 #else
 	GLuint program = LoadShaders( "../my code/vshader.glsl", "../my code/fshader.glsl" );		// Load shaders and use the resulting shader program
@@ -41,7 +95,7 @@ void init()
     TgaImage wolfmouthImage("../my code/wolf_mouth.tga");
     TgaImage treeImage("../my code/tree.tga");
     TgaImage chickenImage("../my code/chicken.tga");
-    TgaImage earthImage("../my code/earth.tga");
+    TgaImage headImage("../my code/hunter_h.tga");
 
 #endif
     glUseProgram(program);
@@ -128,13 +182,12 @@ void init()
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     
-    glGenTextures( 1, &texture_earth );
-    glBindTexture( GL_TEXTURE_2D, texture_earth );
+    glGenTextures( 1, &texture_head );
+    glBindTexture( GL_TEXTURE_2D, texture_head);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, earthImage.width, earthImage.height, 0,
-                 (earthImage.byteCount == 3) ? GL_BGR : GL_BGRA,
-                 GL_UNSIGNED_BYTE, earthImage.data );
-    
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, headImage.width, headImage.height, 0,
+                 (headImage.byteCount == 3) ? GL_BGR : GL_BGRA,
+                 GL_UNSIGNED_BYTE, headImage.data );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -165,10 +218,14 @@ void myMouseCallBack(int button, int state, int x, int y)	// start or end mouse 
 {
     mouseButton = button;
    
-    if( button == GLUT_LEFT_BUTTON && state == GLUT_UP )
+    if( button == GLUT_LEFT_BUTTON && state == GLUT_UP ) {
         mouseButton = -1 ;
-    if( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
+    }
+    if( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN ) {
         prevZoomCoord = -2. * y / g_height + 1;
+        
+    }
+    
 
     glutPostRedisplay() ;
 }
@@ -181,7 +238,9 @@ void myMotionCallBack(int x, int y)
     {
 	   orientation = RotateX( -10 * (arcball_coords.y - anchor.y) ) * orientation;
 	   orientation = RotateY(  10 * (arcball_coords.x - anchor.x) ) * orientation;
+
     }
+
 	
 	if( mouseButton == GLUT_RIGHT_BUTTON )
 		zoom *= 1 + .1 * (arcball_coords.y - anchor.y);
@@ -248,7 +307,7 @@ void drawCube() {
 
 void drawSphere()	// draw a sphere with radius 1 centered around the origin.
 {
-    glBindTexture( GL_TEXTURE_2D, texture_earth);
+    glBindTexture( GL_TEXTURE_2D, texture_sky);
     glUniform1i( uEnableTex, 1);
     glUniformMatrix4fv( uModelView, 1, GL_FALSE, transpose(model_view) );
     glBindVertexArray( sphereData.vao );
@@ -320,6 +379,9 @@ void drawGround(){
 }
 
 
+mat4 HunterArmModel;
+mat4 WolfHeadModel;
+mat4 ChickenHeadModel;
 
 void placeChicken(mat4 cBody,
                   mat4 leftFoot,
@@ -330,7 +392,10 @@ void placeChicken(mat4 cBody,
     set_color(1, 1, 1);
     mvstack.push(model_view);
     model_view *= cBody;
+    model_view *= RotateY(180);
     model_view *= Scale(0.5,0.5,0.5);
+    model_view *= Translate(0,1.25,0);
+    ChickenHeadModel = model_view;
     mat4 temp_view = model_view;
     
 
@@ -407,15 +472,17 @@ void drawTree(double x, double z) {
 
     set_color(106/255.0, 76/255.0, 38/255.0);
     model_view *=Translate(x, 0, z);
-    model_view *= Translate(0, 1.5, 0);
-    model_view *= Scale(2.5, 3, 2.5);
+    mat4 temp_view = model_view;
+    model_view *= Translate(0, 4, 0);
+    model_view *= Scale(1, 8, 1);
     drawCube(texture_tree);
-    
+   
+    model_view = temp_view;
      set_color(47/255.0, 150/255.0, 39/255.0);
 //    model_view *= Scale(1/2, 1/3, 1/2);
-    model_view *= Translate(0,0.5,0);
-    model_view *= Translate(0, 1, 0);
-    model_view *= Scale(3, 2, 3);
+    model_view *= Translate(0,8,0);
+    model_view *= Translate(0,2, 0);
+    model_view *= Scale(6, 4, 6);
     drawCube(texture_tree);
    
     colors.pop();
@@ -425,6 +492,66 @@ void drawTree(double x, double z) {
     
 }
 
+int lanceCounter = 0;
+mat4 lanceModel;
+vec4 lanceStartPoint;
+void drawLance() {
+    
+    mvstack.push(model_view);
+    set_color(1, 1, 1);
+        lanceModel = HunterArmModel;
+        lanceModel *= Translate(0, -2.75, 0);
+        lanceModel *= Scale(0.2,0.2,5);
+        model_view = lanceModel;
+        drawCylinder();
+    
+    if(TIME < 35.8) {}
+    else if(TIME < 36.5) {
+        if(lanceCounter == 0) {
+            lanceCounter ++;
+            lanceStartPoint = getPosition( HunterArmModel * Translate(0, -3, 0));
+        }
+        
+        vec4 v = getPosition(WolfHeadModel) - lanceStartPoint;
+        lanceModel = Translate(lanceStartPoint + v * scale(H, 35.8, 0.7));
+        model_view = lanceModel;
+        drawCylinder();
+    
+    }
+    else if(TIME < 47.75) {}
+    else if(TIME < 48) {
+        if(lanceCounter == 1) {
+            lanceCounter ++;
+            lanceStartPoint = getPosition(HunterArmModel * Translate(0, -3, 0));
+        }
+       
+        mvstack.push(model_view);
+        vec4 v = getPosition(ChickenHeadModel) - lanceStartPoint;
+        lanceModel = Translate(lanceStartPoint + v * scale(H, 37.5, 0.25)) * RotateY(45);
+        lanceModel *= Scale(0.2,0.2,5);
+        model_view = lanceModel;
+        drawCylinder();
+        model_view = mvstack.top();
+        mvstack.pop();
+        
+    }
+    if(TIME > 36.5) {
+        lanceModel = WolfHeadModel;
+        model_view = lanceModel * Scale(0.2,0.2,5);
+        drawCylinder();
+    }
+    
+    else if(TIME > 49) {
+        
+        lanceModel = ChickenHeadModel;
+        model_view = Scale(0.2,0.2,5) * lanceModel;
+        drawCylinder();
+    }
+    
+    colors.pop();
+    model_view = mvstack.top();
+    mvstack.pop();
+}
 
 void drawHunter(mat4 aBody,
                 mat4 aHead,
@@ -437,36 +564,41 @@ void drawHunter(mat4 aBody,
     // move to position aBodyPosition
     //mat4 temp_view = model_view * Translate(0, 0, TIME*-10);
     model_view *= aBody;
-    
+    model_view *= Translate(0, 4.5, 0);
+    set_color(22/255.0, 191/255.0, 181/255.0);
     mat4 temp_view = model_view;
     // draw body
     model_view *= Scale(2,3,1);
     drawCube();
-    
+    colors.pop();
+    set_color(1, 1, 1);
     // draw head
     model_view = temp_view;
     model_view *= Translate(0, 1.5, 0) * Translate(0, 0.75, 0) * Scale(2, 1.5, 2);
     model_view *= aHead;
-    drawCube();
-    
+    drawCube(texture_head);
+    colors.pop();
+       set_color(203/255.0, 180/255.0, 138/255.0);
     // draw leftArm
     model_view = temp_view;
     model_view *= Translate(-1, 1.25, 0);
-    model_view *= Translate(-0.25, 0, 0);
+    model_view *= Translate(-0.5, 0, 0);
     model_view *= aLeftArm;
+    HunterArmModel = model_view;
     model_view *= Translate(0, -1.25, 0);
     model_view *= Scale(1,3,1);
     drawCube();
-    
+ 
     // draw rightArm
     model_view = temp_view;
     model_view *= Translate(1, 1.25, 0);
-    model_view *= Translate(0.25, 0, 0);
+    model_view *= Translate(0.5, 0, 0);
     model_view *= aRightArm;
     model_view *= Translate(0, -1.25, 0);
     model_view *= Scale(1,3,1);
     drawCube();
-    
+    colors.pop();
+    set_color(13/255.0, 117/255.0, 172/255.9);
     // draw leftLeg
     model_view = temp_view;
     model_view *= Translate(-0.5, -1.3, 0);
@@ -482,6 +614,7 @@ void drawHunter(mat4 aBody,
     model_view *= Translate(0,-1.5, 0);
     model_view *= Scale(1,3,1);
     drawCube();
+    colors.pop();
     
     model_view = mvstack.top();
     mvstack.pop();
@@ -495,6 +628,7 @@ void drawWolf(mat4 wBody, mat4 wHead, mat4 wfrontLeg, mat4 wbackLeg, mat4 wtail)
     
     mvstack.push(model_view);
     model_view *= wBody;
+    model_view *= Translate(0, 1.15, 0);
     mat4 temp_view = model_view;
     model_view *=Scale(1, 1, 3);
     drawCube(texture_skin);
@@ -509,7 +643,9 @@ void drawWolf(mat4 wBody, mat4 wHead, mat4 wfrontLeg, mat4 wbackLeg, mat4 wtail)
     model_view *= wHead;
     model_view *= Translate(0, 0, 0.8);
     mvstack.push(model_view);
+    WolfHeadModel = model_view;
     drawCube(texture_wolf);
+    
     
     // mouth
     model_view *= Translate(0, -0.25,0.5);
@@ -574,44 +710,6 @@ void drawWolf(mat4 wBody, mat4 wHead, mat4 wfrontLeg, mat4 wbackLeg, mat4 wtail)
 }
 
 
-void    updateHunter();
-void    updateWolf();
-void    updateChicken();
-void    drawBackGround();
-void    updateCamera();
-
-/*        my variables      */
-vec4 Positions[5] = {
-    vec4(0,0,10,1),
-    vec4(-45,0,-45,1),
-    vec4(45,0,45,1),
-    vec4(0,0,-20,1),
-    vec4(0,0,10,1)
-    
-};
-vec4 tPositions[5] = {
-    vec4(0,0,10,1),
-    vec4(-45,0,-45,1),
-    vec4(45,0,45,1),
-    vec4(0,0,-20,1),
-    vec4(0,0,10,1)
-    
-};
-
-
-
-mat4 model[3];
-mat4 tmodel[3];
-double myTimer[5] = {-1};
-
-vec4 trees[20];
-
-mat4 parts[NPARTS];
-mat4 tparts[NPARTS];
-vec4 eye_vector;
-
-int nTrees = 40;
-/*   end my variables   */
 
 
 void drawBackGround() {
@@ -619,17 +717,15 @@ void drawBackGround() {
     mat4 temp_view = model_view;
     mvstack.push(model_view);
     // draw Trees
-    for(int i = 0; i < 40; i++) {
-        for(int j = 0; j < 40; j++) {
-            drawTree(g_width/2 - g_width/40*i ,g_height/2 -g_height/40*j);
-        }
+    for(int i = 0; i < NTREE; i++) {
+        drawTree(treePos[i].x * 2.5, treePos[i].y * 2.3);
     }
-    
-    set_color(0, 0, 1);
+
     // 300 * 300 ground 
     model_view *= Translate(0,-20,0);
     model_view *= Scale(g_width, 40, g_height);
-    drawCube();
+    set_color(52.0/255, 101.0/255, 22.0/255);
+    drawCube(texture_tree);
 
 
     colors.pop();
@@ -638,95 +734,139 @@ void drawBackGround() {
     
 
 }
+
+void updateLance() {
+    drawLance();
+    
+}
+
+#define CAMERA_HEIGHT 7
+int cameraCounter = 0;
 void updateCamera() {
 	
 	mvstack.push(model_view);
-	
-	if(TIME == 0) {
-		ref = Positions[H];
-		eye = vec4(0,0,15,1);
-		eye_vector = eye;
-	} else if (TIME < 5) {
-		ref = Positions[H];
-		eye = parts[H_HEAD] * Translate(0,0,20) * Positions[H];
-		eye_vector = eye;
-	} else if (TIME < 13){
-		ref = Positions[C];
-		if(TIME < 7) {
-			if(scale(E,5,2) < 0.8) {
-				eye = eye_vector + (scale(E,5,2)) * (ref - eye_vector);
-			}
-			else 
-				eye_vector = eye;
-		}
-		
-	} else if (TIME < 15){
-		ref = Positions[H];
-		eye = parts[H_HEAD] * Translate(0,0,20) * Positions[H];
-		eye_vector = eye;
-
-	} else if (TIME < 23){
-		ref = Positions[W];
-		if(TIME < 17) {
-			if(scale(E,5,2) < 0.8) {
-				eye = eye_vector + (scale(E,15,2)) * (ref - eye_vector);
-			}
-			else 
-				eye_vector = eye;
-		}
-
-		
-	} else if (TIME < 33){
-		ref = Positions[C];
-		if(TIME < 25) {
-			if(scale(E,25,2) < 0.8) {
-				eye = eye_vector + (scale(E,25,2)) * (ref - eye_vector);
-			}
-			else 
-				eye_vector = eye;
-		}
-
-	} else if (TIME < 36){
-		ref = Positions[H];
-		eye = vec4(0,0,-10,1);
-	} else if (TIME < 40){
-		ref = Positions[W];
-		eye = Positions[H] +0.6 * (Positions[W] - Positions[H]);
-	} else if (TIME < 44){
-		ref = Positions[C];
-		eye = Positions[C] + vec4(20,0,0,0);
-	} else if (TIME < 46){
-		ref = Positions[C];
-		eye = Positions[H];
-	} else if (TIME < 48){
-		ref = Positions[H];
-		eye = Positions[H] + vec4(-5,0,-5,0);	
-	} else if (TIME < 50){
-		ref = Positions[C];	
-	} else if (TIME < 54){
-		ref = Positions[H];
-		eye = vec4(0,0,-20,1);
-	}
+    if(TIME == 0) {
+        cameraCounter += cameraCounter == 0? 1 : 0;
+        ref = vec4(0,7,0,1);
+        eye = Translate(0,0,15) * ref;
+    }
+    else if(TIME < 3) {
+        cameraCounter += cameraCounter == 1? 1 : 0;
+        eye = Translate(0,0,15 + 5 * scale(E, 0, 3)) * ref;
+    }else if(TIME < 4) {}
+    else if(TIME < 5){
+        cameraCounter += cameraCounter == 2? 1 : 0;
+        eye = RotateY(45 * scale(H, 4,1))
+            *Translate(0,5*scale(H, 4,1),19+5*scale(H, 4,1))
+            *  ref;
+    }
+    else if(TIME < 13) {
+        if(TIME < 7) {
+            if(cameraCounter == 3) {
+                // save current eye pos
+                tPositions[E] = eye;
+            }
+            ref = getPosition(model[C]);
+            cameraCounter += (cameraCounter == 3)? 1 : 0;
+            eye = Translate(ref) * RotateY(45) * Translate(0,7,25) *
+            Translate(0, 0, (getDistance(ref, tPositions[E])-25) * cos(90 * DegreesToRadians * scale(H,5,2))) * vec4(0,0,0,1);
+            
+        }
+        else if(TIME < 12.75) {
+            ref = getPosition(model[C]);
+        }
+        else if(TIME < 13) {
+            if(cameraCounter == 4) {
+            }
+            cameraCounter += (cameraCounter == 4)? 1 : 0;
+            
+            ref = getPosition(model[H]);
+            eye = vec4(0,7,25,1);
+        }
+    }
+    else if (TIME < 15) {
+        eye = Translate(getPosition(model[H])) * RotateY(45) * RotateY(-90 * sin(90 * DegreesToRadians * scale(H, 13,2))) * Translate(0,7,25) * vec4(0,0,0,1);
+    }
+    else if(TIME < 17) {
+            if(cameraCounter == 5) {
+                // save current eye pos
+                tPositions[E] = eye;
+            }
+            ref = getPosition(model[W]);
+            cameraCounter += (cameraCounter == 5)? 1 : 0;
+            eye = Translate(ref) * RotateY(315) * Translate(0,7,25) *
+            Translate(0, 0, (getDistance(ref, tPositions[E])-25) * cos(90 * DegreesToRadians * scale(H,15,2))) * vec4(0,0,0,1);
+            
+    }
+    else if(TIME < 21) {
+        ref = getPosition(model[W]);
+    }
+    else if(TIME < 22) {
+        eye = Translate(0, 10, 20) * getPosition(model[H]);
+    }
+    else if(TIME < 27) {
+        ref = getPosition(model[W]);
+    }
+    else if(TIME < 36.5) {
+        ref = getPosition(model[W]);
+        eye = RotateY(740 * scale(H, 27,10)) * Translate(0,10,25) * getPosition(model[H]);
+        
+    }
+    else if(TIME < 37) {
+        ref = vec4(0,0,-45,1);
+        eye = Translate(0,10,-60) * vec4(0,0,0,1);
+    }
+    else if(TIME < 38) {
+        
+    }
+    else if(TIME < 43) {
+        if(cameraCounter == 6) {
+            // save current eye pos
+            tPositions[E] = eye;
+            eye = vec4(-50,10,-50,1);
+        }
+        eye = vec4(-60,10,-60,1);
+        ref = getPosition(model[C]);
+        cameraCounter += (cameraCounter == 6)? 1 : 0;
+        
+    }
+    else if(TIME < 52) {
+        if(cameraCounter == 6) {
+            eye = vec4(10,0, 10,1);
+        }
+        ref = getPosition(model[C]);
+        
+    }
+    else if(TIME < 54){
+        ref = getPosition(model[H]);
+        eye = vec4 (0,10,-20);
+    } else if(TIME < 62){
+        eye = vec4(0, 250 * scale(H,54,8),20,0);
+        ref = getPosition(model[H]);
+    }
 
 	model_view = mvstack.top();
 	mvstack.pop();
+    
 }
 
 
 void updateHunter() {
 
     mvstack.push(model_view);
-    
+   
+
     // initializePosition
     if(TIME == 0) {
         model[H] *= Translate(0,0,10);
 
         model[H] *= RotateY(180);
         tmodel[H] = model[H];
+        myTimer[H] = 0;
         
         /* TODO have to raise up with a distance */
         
-        myTimer[H] = TIME;
+
     }
     else if(TIME < 3) {
 
@@ -741,60 +881,56 @@ void updateHunter() {
         parts[H_ARM_R] = tparts[H_ARM_R] * RotateX(30 * sin(360 * 5 * DegreesToRadians * scale(H,0,3)));
 		
     }
+    else if(TIME < 4) {}
     else if(TIME < 5) {
 
-
-
-
-        parts[H_HEAD] = tparts[H_HEAD] * RotateY(45*sin(180 * DegreesToRadians * scale(H, 3, 5)));
+        parts[H_HEAD] = tparts[H_HEAD] * RotateY(45*sin(90 * DegreesToRadians * scale(H, 4, 1)));
     }
     else if (TIME < 13) {
 		tparts[H_HEAD] = parts[H_HEAD];
        // chicken jump  
     }
     else if (TIME < 15) {
-        parts[H_HEAD] = tparts[H_HEAD] * RotateY(-90*sin(180 * DegreesToRadians * scale(H, 3, 5)));
+        parts[H_HEAD] = tparts[H_HEAD] * RotateY(-90*sin(90 * DegreesToRadians * scale(H, 13, 2)));
     }
     else if(TIME < 23) {
-		tparts[H_HEAD] = parts[H_HEAD];	
+
        // wolf walk around 
     }
     else if(TIME < 33) {
-        
+        parts[H_HEAD]= RotateY(getDegree(getPosition(model[H]), getPosition(model[C]))) * tparts[H_HEAD];
     }
     else if(TIME < 35.5) {
 		/* TODO might need rotate body */
-        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX(-230 * scale(H, 33, 2.5));
+        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX(230 * scale(H, 33, 2.5));
     }
     else if(TIME < 36) {
-        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX(-230 + 230 * scale(H, 35.5, 0.5));
+        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX(230 - 230 * scale(H, 35.5, 0.5));
     }
     else if(TIME < 40) {
         
     }
     else if(TIME < 46) {
-        
+        model[H] = RotateY(45) * tmodel[H];
     }
-    else if(TIME < 47.75) {
-        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX( -230 * scale(H, 46, 1.75));
+    else if(TIME < 48.75) {
+        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX( 230 * scale(H, 47, 1.75));
     }
-    else if(TIME < 48) {
-        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX( -230 + 230 * scale(H, 47.75, 0.25));
+    else if(TIME < 49) {
+        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX( 230 - 230 * scale(H, 48.75, 0.25));
     }
     else if(TIME < 50) {
         tmodel[H] = model[H];
         tPositions[H] = Positions[H];
     }
     else if(TIME < 54) {
+        parts[H_HEAD] = mat4();
         model[H] = RotateY(180) * tmodel[H];
-        model[H] = Translate(0, 0, 20 * scale(H, 50, 4)) * tmodel[H];
+       // model[H] *= Translate(0, 0, 20 * scale(H, 50, 4)) * tmodel[H];
         vec4 dest(0,0,-20,1);
         vec4 v = dest - Positions[H];
         Positions[H] = tPositions[H] + scale(H,0, 3) * v;
-        parts[H_LEG_L] = tparts[H_LEG_L] * RotateX(30 * sin(360 * 5 * DegreesToRadians * scale(H,50,4)));
-        parts[H_LEG_R] = tparts[H_LEG_R] * RotateX(-30 * sin(360 * 5 * DegreesToRadians * scale(H,50,4)));
-        parts[H_ARM_L] = tparts[H_ARM_L] * RotateX(-30 * sin(360 * 5 * DegreesToRadians * scale(H,50,4)));
-        parts[H_ARM_R] = tparts[H_ARM_R] * RotateX(30 * sin(360 * 5 * DegreesToRadians * scale(H,50,4)));
+    
     }
     else {
         tmodel[H] = model[H];
@@ -875,7 +1011,7 @@ void updateWolf() {
     else if(TIME < 20) {
         if(wolfCounter == 2)
             wolfCounter++;
-        model[W] = tmodel [W] * Translate(0, 0, -10 + 10*scale(W,19,1)) * RotateY(180);
+        model[W] = tmodel [W] * RotateY(180) * Translate(0, 0, -10 + 10*scale(W,19,1)) * RotateY(180);
         swingLegs(19,1,10);
     
     }
@@ -911,7 +1047,18 @@ void updateWolf() {
         
         
     }
-    
+    else if(TIME < 37.5){
+        model[W] = RotateZ(90*(scale(C,36.5,1))) * tmodel[W];
+        
+    }
+    else if(TIME < 38) {
+        colors.pop();
+        set_color(1 * sin(90 * scale(W, 37.5,0.5)), 0, 0);
+    }
+    else {
+        colors.pop();
+        set_color(1,0,0);
+    }
     colors.pop();
     drawWolf(model[W], parts[W_HEAD], parts[W_F_LEG], parts[W_B_LEG], parts[W_TAIL]);
     model_view = mvstack.top();
@@ -1032,7 +1179,7 @@ void updateChicken() {
                     * Translate(0,0, getDistance(getPosition(tmodel[C]), getPosition(tmodel[H])));
              model[C] *= RotateY(-90);
             parts[C_WING_L] = tparts[C_WING_L] * RotateZ(-65 * cos(3600 * scale(C, 27, 10)));
-            parts[C_WING_R] = tparts[C_WING_R] * RotateZ(65 * cos(3600 * scale(C, 27, 10)));
+          parts[C_WING_R] = tparts[C_WING_R] * RotateZ(65 * cos(3600 * scale(C, 27, 10)));
             swingChickenFeet(27,10, 1800);
 		}
     }
@@ -1044,8 +1191,8 @@ void updateChicken() {
             { chickenTimeCounter++;
 				tmodel[C] = model[C];
 			}
-            parts[C_WING_L] = tparts[C_WING_L] * RotateZ(-135 * scale(C, 38, 1));
-            parts[C_WING_R] = tparts[C_WING_R] * RotateZ(135 * scale(C, 38, 1));
+         parts[C_WING_L] = tparts[C_WING_L] * RotateZ(-135 * scale(C, 38, 1));
+         parts[C_WING_R] = tparts[C_WING_R] * RotateZ(135 * scale(C, 38, 1));
             
         }
         else if(TIME < 40) {
@@ -1094,7 +1241,9 @@ void updateChicken() {
         { chickenTimeCounter++;
             tmodel[C] = RotateY(getDegree(getPosition(model[C]), getPosition(model[H]))) * Translate(0,0,-1* getDistance(getPosition(model[C]), getPosition(model[H])));
         }
-        model[C] = tmodel[C] * Translate(0,0,scale(C,44,5) * 40);
+        if(TIME < 48)
+            model[C] = tmodel[C] * Translate(0,0,scale(C,44,4) * 55);
+        swingChickenFeet(27,10, 1800);
 
         //model[C] *= Translate(0,0, scale(C,44,5) * 50 );
     }
@@ -1104,7 +1253,8 @@ void updateChicken() {
             chickenTimeCounter++;
             tmodel[C] = model[C];
         }
-		model[C] = tmodel[C] * RotateZ(90 * scale(C,49,1));
+		model[C] = tmodel[C] * RotateZ(-90 * scale(C,49,1));
+
 	}
 	else if(TIME < 52) {
         if(chickenTimeCounter == 18 )
@@ -1128,7 +1278,7 @@ void updateChicken() {
 }
 
 
-
+int frame = 0;
 void display(void) {
     
 	basis_id = 0;
@@ -1138,18 +1288,20 @@ void display(void) {
     set_color(1, 1, 1);
 	model_view = LookAt( eye, ref, up );
    
+
 	model_view *= orientation;
   model_view *= Scale(zoom);												drawAxes(basis_id++);
-
-    drawTree(0, 0);
+    if(animate)
+        std::cout << "fps = " << frame++ / TIME << std::endl;
     //drawWolf(model[W], parts[W_HEAD], parts[W_F_LEG], parts[W_B_LEG], parts[W_TAIL]);
     updateHunter();
     updateWolf();
     updateChicken();
-    //drawBackGround();
-    // updateCamera();
+    drawBackGround();
+     updateCamera();
+    updateLance();
 
-
+    colors.pop();
     std::cout << TIME << std::endl;
     glutSwapBuffers();
     
@@ -1163,12 +1315,7 @@ void myReshape(int w, int h)	// Handles window sizing and resizing.
 	glViewport(0, 0, g_width = w, g_height = h);	
 }		
 
-void instructions() {	 std::cout <<	"Press:a"									<< '\n' <<
-										"  r to restore the original view."			<< '\n' <<
-										"  0 to restore the original state."		<< '\n' <<
-										"  a to toggle the animation."				<< '\n' <<
-										"  b to show the next basis's axes."		<< '\n' <<
-										"  B to show the previous basis's axes."	<< '\n' <<
+void instructions() {	 std::cout <<	"Press:a start"								<< '\n' <<
 										"  q to quit."								<< '\n';	}
 
 void myKey(unsigned char key, int x, int y)
@@ -1176,12 +1323,7 @@ void myKey(unsigned char key, int x, int y)
     switch (key) {
         case 'q':   case 27:				// 27 = esc key
             exit(0); 
-		case 'b':
-			std::cout << "Basis: " << ++basis_to_display << '\n';
-			break;
-		case 'B':
-			std::cout << "Basis: " << --basis_to_display << '\n';
-			break;
+	
         case 'a':							// toggle animation
             
             if(animate) std::cout << "Elapsed time " << TIME << std::endl;
@@ -1189,12 +1331,7 @@ void myKey(unsigned char key, int x, int y)
             animate = 1 - animate ;
             if(!animate) pause_time = TIME;
             TM.Reset();
-            break ;
-		case '0':							// Add code to reset your object here.
-			TIME = 0;	TM.Reset() ;											
-        case 'r':
-			orientation = mat4();			
-            break ;
+	
     }
     glutPostRedisplay() ;
 }
@@ -1221,8 +1358,8 @@ int main()
     glutIdleFunc(idleCallBack) ;
     glutReshapeFunc (myReshape);
     glutKeyboardFunc( myKey );
-    glutMouseFunc(myMouseCallBack) ;
-    glutMotionFunc(myMotionCallBack) ;
+  //  glutMouseFunc(myMouseCallBack) ;
+  //  glutMotionFunc(myMotionCallBack) ;
     glutPassiveMotionFunc(myPassiveMotionCallBack) ;
 
 	glutMainLoop();

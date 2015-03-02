@@ -110,23 +110,16 @@ void drawTriangle(int a, int b, int c, int uv_a, int uv_b, int uv_c, point3 norm
     chickenNormals[chickenIndex] = normal;
     chickenUV[chickenIndex] = uvVertices[uv_a];
     chickenIndex++;
-    std::cout << chickenIndex<< std::endl;
-    std::cout << chickenVertices[a] << std:: endl << std:: endl;
     
     chickenPoints[chickenIndex] = chickenVertices[b];
     chickenNormals[chickenIndex] = normal;
     chickenUV[chickenIndex] = uvVertices[uv_b];
     chickenIndex++;
-    std::cout << chickenIndex << std::endl;
-    std::cout << chickenVertices[b] << std:: endl << std:: endl;
 
     chickenPoints[chickenIndex] = chickenVertices[c];
     chickenNormals[chickenIndex] = normal;
     chickenUV[chickenIndex] = uvVertices[uv_c];
     chickenIndex++;
-    std::cout << chickenIndex << std::endl;
-    std::cout << chickenVertices[c] << std:: endl << std:: endl;
-    std::cout << std::endl << std::endl;
 
 }
 void colorChicken() {

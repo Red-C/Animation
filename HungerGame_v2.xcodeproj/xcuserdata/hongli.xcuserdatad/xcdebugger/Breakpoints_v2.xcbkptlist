@@ -10,41 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HungerGame_v2/my code/anim.cpp"
-            timestampString = "446952507.101461"
+            timestampString = "446998511.650675"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "600"
-            endingLineNumber = "600">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HungerGame_v2/my code/anim.cpp"
-            timestampString = "446952507.101461"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "700"
-            endingLineNumber = "700"
-            landmarkName = "updateCamera()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HungerGame_v2/my code/anim.cpp"
-            timestampString = "446956583.048935"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1014"
-            endingLineNumber = "1014"
+            startingLineNumber = "1161"
+            endingLineNumber = "1161"
             landmarkName = "updateChicken()"
             landmarkType = "7">
          </BreakpointContent>
@@ -56,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HungerGame_v2/my code/anim.cpp"
-            timestampString = "446956583.048935"
+            timestampString = "446998511.650675"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1019"
-            endingLineNumber = "1019"
+            startingLineNumber = "1166"
+            endingLineNumber = "1166"
             landmarkName = "updateChicken()"
             landmarkType = "7">
          </BreakpointContent>
@@ -72,12 +42,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HungerGame_v2/my code/anim.cpp"
-            timestampString = "446955705.033855"
+            timestampString = "446998511.650675"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "829"
-            endingLineNumber = "829"
-            landmarkName = "getPosition(mat4 model)"
+            startingLineNumber = "964"
+            endingLineNumber = "964"
+            landmarkName = "getDistance(vec4 a,vec4 b)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -88,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HungerGame_v2/my code/anim.cpp"
-            timestampString = "446956583.048935"
+            timestampString = "446998511.650675"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1116"
-            endingLineNumber = "1116"
+            startingLineNumber = "1266"
+            endingLineNumber = "1266"
             landmarkName = "updateChicken()"
             landmarkType = "7">
          </BreakpointContent>
