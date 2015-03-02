@@ -33,7 +33,12 @@
 #define C_WING_R          6
 #define C_LEG_L           7
 #define C_LEG_R           8
+#define W_F_LEG           9
+#define W_B_LEG           10
+#define W_HEAD            11
+#define W_TAIL            12
 
+#define NPARTS            13
 #define scale(a, b, c) ((TIME - myTimer[a] - b ) / c)
 
 // SPEED

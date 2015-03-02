@@ -59,6 +59,12 @@
 		51A667AB1A9C77E900CC05A5 /* fshader.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fshader.glsl; sourceTree = "<group>"; };
 		51A667AC1A9C77E900CC05A5 /* vshader.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vshader.glsl; sourceTree = "<group>"; };
 		51A667B41A9C955100CC05A5 /* myConstant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myConstant.h; sourceTree = "<group>"; };
+		51A667C01AA3492400CC05A5 /* wolf.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = wolf.tga; sourceTree = "<group>"; };
+		51A667C11AA34B1700CC05A5 /* wolf_test.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = wolf_test.tga; sourceTree = "<group>"; };
+		51A667C31AA35F4500CC05A5 /* skin.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = skin.tga; sourceTree = "<group>"; };
+		51A667C41AA36B9B00CC05A5 /* wolf_mouth.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = wolf_mouth.tga; sourceTree = "<group>"; };
+		51A667C51AA3CA6400CC05A5 /* tree.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = tree.tga; sourceTree = "<group>"; };
+		51A668051AA3F2F800CC05A5 /* chicken.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = chicken.tga; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +165,12 @@
 		51A667A61A9C77E900CC05A5 /* my code */ = {
 			isa = PBXGroup;
 			children = (
+				51A667C41AA36B9B00CC05A5 /* wolf_mouth.tga */,
+				51A667C11AA34B1700CC05A5 /* wolf_test.tga */,
+				51A668051AA3F2F800CC05A5 /* chicken.tga */,
+				51A667C01AA3492400CC05A5 /* wolf.tga */,
+				51A667C31AA35F4500CC05A5 /* skin.tga */,
+				51A667C51AA3CA6400CC05A5 /* tree.tga */,
 				51A667A71A9C77E900CC05A5 /* anim.cpp */,
 				51A667A81A9C77E900CC05A5 /* challenge.tga */,
 				51A667A91A9C77E900CC05A5 /* earth.tga */,
@@ -350,6 +362,7 @@
 				51A6678B1A9C77A100CC05A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

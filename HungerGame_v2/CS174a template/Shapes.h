@@ -44,55 +44,92 @@ point4 chickenVertices[12] = {
 
 point2 uvVertices[22] = {
     
+    /*
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    
+   */
+    point2(5/13.0,10/13.0),
+    point2(7/13.0,10/13.0),
+    point2(0/13.0,7/13.0),
+    point2(2/13.0,7/13.0),
+     
+    point2(5/13.0,7/13.0),
+    point2(7/13.0,7/13.0),
+    
+    /*
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    */
+   
 
-    point2(5/14.0,10/14.0),
-    point2(7/14.0,10/14.0),
-    point2(0/14.0,7/14.0),
-    point2(2/14.0,7/14.0),
-    point2(5/14.0,7/14.0),
-    point2(7/14.0,7/14.0),
-    point2(10/14.0,7/14.0),
-    point2(1/14.0,4/14.0),
-    point2(2/14.0,4/14.0),
-    point2(10/14.0,4/14.0),
-    point2(11/14.0,4/14.0),
-    point2(13/14.0,4/14.0),
-    point2(1/14.0,2/14.0),
-    point2(5/14.0,2/14.0),
-    point2(7/14.0,2/14.0),
-    point2(11/14.0,2/14.0),
-    point2(13/14.0,2/14.0),
-    point2(1/14.0,0/14.0),
-    point2(5/14.0,0/14.0),
-    point2(10/14.0,6/14.0),
-    point2(11/14.0,6/14.0),
-    point2(0/14.0,4/14.0)
+    point2(10/13.0,7/13.0),
+    point2(1/13.0,4/13.0),
+    point2(2/13.0,4/13.0),
+    point2(10/13.0,4/13.0),
+    point2(11/13.0,4/13.0),
+    point2(13/13.0,4/13.0),
+    point2(1/13.0,2/13.0),
+    
+    point2(5/13.0,2/13.0),
+    point2(7/13.0,2/13.0),
+    
+    /*
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+    point2(0,0),
+     */
+
+    point2(11/13.0,2/13.0),
+    point2(13/13.0,2/13.0),
+    point2(1/13.0,0/13.0),
+    point2(5/13.0,0/13.0),
+    point2(10/13.0,6/13.0),
+    point2(11/13.0,6/13.0),
+    point2(0/13.0,4/13.0)
+ 
 };
+
 int chickenIndex = 0;
 
 
 void drawTriangle(int a, int b, int c, int uv_a, int uv_b, int uv_c, point3 normal) {
-    
+
     chickenPoints[chickenIndex] = chickenVertices[a];
     chickenNormals[chickenIndex] = normal;
-    chickenUV[chickenIndex] = chickenUV[uv_a];
+    chickenUV[chickenIndex] = uvVertices[uv_a];
     chickenIndex++;
+    std::cout << chickenIndex<< std::endl;
+    std::cout << chickenVertices[a] << std:: endl << std:: endl;
     
     chickenPoints[chickenIndex] = chickenVertices[b];
     chickenNormals[chickenIndex] = normal;
-    chickenUV[chickenIndex] = chickenUV[uv_b];
+    chickenUV[chickenIndex] = uvVertices[uv_b];
     chickenIndex++;
-    
+    std::cout << chickenIndex << std::endl;
+    std::cout << chickenVertices[b] << std:: endl << std:: endl;
+
     chickenPoints[chickenIndex] = chickenVertices[c];
     chickenNormals[chickenIndex] = normal;
-    chickenUV[chickenIndex] = chickenUV[uv_c];
+    chickenUV[chickenIndex] = uvVertices[uv_c];
     chickenIndex++;
+    std::cout << chickenIndex << std::endl;
+    std::cout << chickenVertices[c] << std:: endl << std:: endl;
+    std::cout << std::endl << std::endl;
+
 }
 void colorChicken() {
-    //front
-    drawTriangle(0,1,2,4,5,13,N_FRONT);
-    drawTriangle(1,2,3,5,13,14,N_FRONT);
-    
     //drawTop A
     drawTriangle(0,1,4,4,5,0,N_UP);
     drawTriangle(1,4,5,5,0,1,N_UP);
@@ -100,7 +137,11 @@ void colorChicken() {
     //drawBack A
     drawTriangle(4,5,7,3,2,21,N_BACK);
     drawTriangle(4,6,7,3,8,21,N_BACK);
-    
+        //front
+    drawTriangle(0,1,2,4,5,13,N_FRONT);
+    drawTriangle(1,2,3,5,13,14,N_FRONT);
+
+
     //drawTop B
     drawTriangle(7,9,8,9,10,20,N_UP);
     drawTriangle(6,8,7,19,20,9,N_UP);
@@ -112,6 +153,14 @@ void colorChicken() {
     //drawBottom
     drawTriangle(2,10,11,13,12,17,N_DOWN);
     drawTriangle(2,3,11,13,18,17,N_DOWN);
+
+
+    
+
+    drawTriangle(3,1,5,14,5,6,N_RIGHT);
+    drawTriangle(3,7,5,14,9,6,N_RIGHT);
+    drawTriangle(3,7,9,14,9,10,N_RIGHT);
+    drawTriangle(3,11,9,14,15,10,N_RIGHT);
     
     //drawLeft
     drawTriangle(2,0,4,13,4,3,N_LEFT);
@@ -119,13 +168,9 @@ void colorChicken() {
     drawTriangle(2,6,8,13,8,7,N_LEFT);
     drawTriangle(2,10,8,13,12,7,N_LEFT);
     
-    //drawRight
-    drawTriangle(3,1,5,14,5,6,N_RIGHT);
-    drawTriangle(3,7,5,14,9,6,N_RIGHT);
-    drawTriangle(3,7,9,14,9,10,N_RIGHT);
-    drawTriangle(3,11,9,14,15,10,N_RIGHT);
-    
-    
+
+
+
 }
 
 void generateChicken(GLuint program, ShapeData* chickenData)
@@ -167,34 +212,52 @@ point4 vertices[8] = {
     point4(  0.5, -0.5, -0.5, 1 )
 };
 
+point2 uvvertices[14] = {
+    point2(0.5,0),
+    point2(0.75,0),
+    point2(0.25,0.25),
+    point2(0.5,0.25),
+    point2(0.75,0.25),
+    point2(1,0.25),
+    point2(0.25,0.5),
+    point2(0.5,0.5),
+    point2(0.75,0.5),
+    point2(1,0.5),
+    point2(0.5,0.75),
+    point2(0.75,0.75),
+    point2(0.5,1),
+    point2(0.75,1)
+
+};
+
 // quad generates two triangles for each face and assigns normals and texture coordinates
 //    to the vertices
 int Index = 0;
-void quad( int a, int b, int c, int d, const point3& normal )
+void quad( int a, int b, int c, int d, const point3& normal, int ua, int ub, int uc, int ud )
 {
     cubePoints[Index] = vertices[a]; cubeNormals[Index] = normal; 
-    cubeUV[Index] = point2(0, 1); Index++;
+    cubeUV[Index] = uvvertices[ua]; Index++;
     cubePoints[Index] = vertices[b]; cubeNormals[Index] = normal;
-    cubeUV[Index] = point2(0, 0); Index++;
+    cubeUV[Index] = uvvertices[ub]; Index++;
     cubePoints[Index] = vertices[c]; cubeNormals[Index] = normal;
-    cubeUV[Index] = point2(1, 0); Index++;
+    cubeUV[Index] = uvvertices[uc]; Index++;
     cubePoints[Index] = vertices[a]; cubeNormals[Index] = normal;
-    cubeUV[Index] = point2(0, 1); Index++;
+    cubeUV[Index] = uvvertices[ua]; Index++;
     cubePoints[Index] = vertices[c]; cubeNormals[Index] = normal;
-    cubeUV[Index] = point2(1, 0); Index++;
+    cubeUV[Index] = uvvertices[uc]; Index++;
     cubePoints[Index] = vertices[d]; cubeNormals[Index] = normal;
-    cubeUV[Index] = point2(1, 1); Index++;
+    cubeUV[Index] = uvvertices[ud]; Index++;
 }
 
 // generate 12 triangles: 36 vertices, 36 normals, 36 texture coordinates
 void colorcube()
 {
-    quad( 1, 0, 3, 2, point3( 0,  0,  1) );
-    quad( 2, 3, 7, 6, point3( 1,  0,  0) );
-    quad( 3, 0, 4, 7, point3( 0, -1,  0) );
-    quad( 6, 5, 1, 2, point3( 0,  1,  0) );
-    quad( 4, 5, 6, 7, point3( 0,  0, -1) );
-    quad( 5, 4, 0, 1, point3(-1,  0,  0) );
+    quad( 1, 0, 3, 2, point3( 0,  0,  1), 3,0,1,4);  //uv = 0.5,
+    quad( 2, 3, 7, 6, point3( 1,  0,  0), 4,5,9,8);
+    quad( 3, 0, 4, 7, point3( 0, -1,  0), 13,12,10,11);
+    quad( 6, 5, 1, 2, point3( 0,  1,  0), 8,7,3,4);
+    quad( 4, 5, 6, 7, point3( 0,  0, -1),10,7,8,11 );
+    quad( 5, 4, 0, 1, point3(-1,  0,  0), 6,7,3,2 );
 }
 
 // initialization
